@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -60,8 +61,10 @@ import org.apache.maven.shared.dependency.graph.DependencyNode;
 import org.apache.maven.shared.dependency.graph.traversal.DependencyNodeVisitor;
 
 /**
- * Fail if unaligned dependencies
- * Add ability to exlcude an artifact
+ * TODO: A failure flag that controls build failure if there are > 0 unaligned dependencies, also perhaps
+ * distinguish between unaligned direct and unaligned transitive.
+ * <p>
+ * TODO: A support for an exludes file allows dependencies with unaligned dependencies to be ignored.
  */
 @Mojo(name = "report", requiresDependencyCollection = ResolutionScope.TEST, threadSafe = true)
 public class AlignmentReporterMojo
@@ -153,20 +156,28 @@ public class AlignmentReporterMojo
 
             buildingRequest.setProject(project);
 
-            List<Artifact> alignedDirect = getProject().getDependencyArtifacts().stream()
-                                                       .filter(artifactFilter::include)
-                                                       .filter(artifact -> alignmentPattern.matcher(artifact.getVersion())
-                                                                                           .find())
+            Set<Artifact> reactorArtifacts =
+                    reactorProjects.stream().map(p -> p.getArtifact()).collect(Collectors.toSet());
 
-                                                       .sorted(ARTIFACT_COMPARATOR)
-                                                       .collect(Collectors.toList());
+            Set<Artifact> dependencyArtifacts = getProject().getDependencyArtifacts()
+                                                            .stream()
+                                                            .filter(a -> !reactorArtifacts.contains(a))
+                                                            .collect(Collectors.toSet());
 
-            List<Artifact> unalignedDirect = getProject().getDependencyArtifacts().stream()
-                                                         .filter(artifactFilter::include)
-                                                         .filter(artifact -> !alignmentPattern.matcher(artifact.getVersion())
-                                                                                              .find())
-                                                         .sorted(ARTIFACT_COMPARATOR)
-                                                         .collect(Collectors.toList());
+            List<Artifact> alignedDirect = dependencyArtifacts.stream()
+                                                              .filter(artifactFilter::include)
+                                                              .filter(artifact -> alignmentPattern.matcher(artifact.getVersion())
+                                                                                                  .find())
+
+                                                              .sorted(ARTIFACT_COMPARATOR)
+                                                              .collect(Collectors.toList());
+
+            List<Artifact> unalignedDirect = dependencyArtifacts.stream()
+                                                                .filter(artifactFilter::include)
+                                                                .filter(artifact -> !alignmentPattern.matcher(artifact.getVersion())
+                                                                                                     .find())
+                                                                .sorted(ARTIFACT_COMPARATOR)
+                                                                .collect(Collectors.toList());
 
             String alignedDirectStr = reportDirectDependencies(alignedDirect, "Aligned direct");
 
