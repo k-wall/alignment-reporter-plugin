@@ -61,14 +61,17 @@ import org.apache.maven.shared.dependency.graph.DependencyNode;
 import org.apache.maven.shared.dependency.graph.traversal.DependencyNodeVisitor;
 
 /**
- * TODO: A failure flag that controls build failure if there are > 0 unaligned dependencies, also perhaps
- * distinguish between unaligned direct and unaligned transitive.
- * <p>
+ * This plugin tests a project's dependencies for 'alignment' and produces a simple text based report.
+ * Based ideas and code from the Maven Dependency Plugin project.
+ *
+ * TODO: Add failure flag that controls build failure if there are > 0 unaligned dependencies, also perhaps
+ * distinguish between unaligned direct and unaligned transitive to allow the user to fine tune the
+ * failure case.
+ *
  * TODO: A support for an exludes file allows dependencies with unaligned dependencies to be ignored.
  */
 @Mojo(name = "report", requiresDependencyCollection = ResolutionScope.TEST, threadSafe = true)
-public class AlignmentReporterMojo
-        extends AbstractMojo
+public class AlignmentReporterMojo extends AbstractMojo
 {
     private static final Comparator<Artifact> ARTIFACT_COMPARATOR = Comparator.comparing(artifact ->
                                                                                                  String.format("%s:%s",
