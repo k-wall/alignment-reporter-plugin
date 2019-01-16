@@ -49,9 +49,7 @@ import org.apache.maven.plugin.MojoFailureException;
 import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.Parameter;
-import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.ProjectBuildingRequest;
 import org.apache.maven.shared.dependency.graph.DependencyGraphBuilder;
 import org.apache.maven.shared.dependency.graph.DependencyGraphBuilderException;
 import org.apache.maven.shared.dependency.graph.DependencyNode;
@@ -74,18 +72,19 @@ public abstract class AbstractAlignmentReporterMojo extends AbstractMojo
     @Parameter(defaultValue = "${project}", readonly = true, required = true)
     private MavenProject project;
     @Parameter(defaultValue = "${session}", readonly = true, required = true)
-    private MavenSession session;
+    protected MavenSession session;
 
     /**
      * Contains the full list of projects in the reactor.
      */
     @Parameter(defaultValue = "${reactorProjects}", readonly = true, required = true)
     protected List<MavenProject> reactorProjects;
+
     /**
      * The dependency tree builder to use.
      */
     @Component(hint = "default")
-    private DependencyGraphBuilder dependencyGraphBuilder;
+    protected DependencyGraphBuilder dependencyGraphBuilder;
     /**
      * If specified, this parameter will cause the dependency tree to be written to the path specified, instead of
      * writing to the console.
@@ -174,13 +173,6 @@ public abstract class AbstractAlignmentReporterMojo extends AbstractMojo
         {
             ArtifactFilter artifactFilter = createScopeResolvingArtifactFilter();
 
-            ProjectBuildingRequest buildingRequest =
-                    new DefaultProjectBuildingRequest(session.getProjectBuildingRequest());
-
-            buildingRequest.setProject(project);
-
-            Set<Artifact> reactorArtifacts =
-                    reactorProjects.stream().map(p -> p.getArtifact()).collect(Collectors.toSet());
 
             Set<Artifact> dependencyArtifacts = getDirectDependencies();
 
@@ -202,13 +194,7 @@ public abstract class AbstractAlignmentReporterMojo extends AbstractMojo
             String alignedDirectStr = reportDirectDependencies(alignedDirect, "Aligned");
             String unalignedDirectStr = reportDirectDependencies(unalignedDirect, "Unaligned");
 
-            DependencyNode rootNode =
-                    dependencyGraphBuilder.buildDependencyGraph(buildingRequest, artifactFilter, reactorProjects);
-
-            List<DependencyNode> alignedDirectDeps = rootNode.getChildren().stream()
-                                                             .filter(node -> alignedDirect
-                                                                     .contains(node.getArtifact()))
-                                                             .collect(Collectors.toList());
+            List<DependencyNode> alignedDirectDeps = getAlignedDirectDependencyNodes(artifactFilter, alignedDirect);
 
             Map<DependencyNode, AtomicInteger> unalignedTransitives = getUnalignedDependencies(alignedDirectDeps);
             String unalignedTransitivesStr = reportUnalignedTransitiveDependenciesSummary(unalignedTransitives);
@@ -279,6 +265,8 @@ public abstract class AbstractAlignmentReporterMojo extends AbstractMojo
      * Returns the set of direct dependencies that are to be considered by the report.
      */
     protected abstract Set<Artifact> getDirectDependencies();
+
+    protected abstract List<DependencyNode> getAlignedDirectDependencyNodes(final ArtifactFilter artifactFilter, final List<Artifact> alignedDirect) throws DependencyGraphBuilderException;
 
     private String reportDirectDependencies(final List<Artifact> list, final String prefix) throws IOException
     {

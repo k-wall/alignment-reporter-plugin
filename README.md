@@ -15,6 +15,12 @@ Example usage:
 mvn alignment-reporter:alignment-reporter-plugin:1.0-SNAPSHOT:report -Dscope=runtime -DalignmentPattern=myorg
 ``
 
+For multi-module projects, the ``aggregate-report`` produces a single report.
+
+``
+mvn alignment-reporter:alignment-reporter-plugin:1.0-SNAPSHOT:aggregate-report -Dscope=runtime -DalignmentPattern=myorg
+``
+
 Example report:
 
 ``
