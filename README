@@ -22,7 +22,7 @@ Example report:
 mymodule
 ========
 
-9 Aligned direct direct dependencies
+9 Aligned direct dependencies
 ------------------------------------
 Aligned direct - com.fasterxml.jackson.core:jackson-core:2.9.6.myorg-00001
 Aligned direct - com.fasterxml.jackson.core:jackson-databind:2.9.6.myorg-00001
@@ -34,7 +34,7 @@ Aligned direct - org.jboss.resteasy:resteasy-vertx:3.6.1.SP2-myorg-00001
 Aligned direct - org.slf4j:slf4j-api:1.7.21.myorg-00001
 Aligned direct - org.slf4j:slf4j-log4j12:1.7.21.myorg-00001
 
-1 Unaligned direct direct dependency
+1 Unaligned direct dependency
 ------------------------------------
 Unaligned direct - com.fasterxml.jackson.module:jackson-module-jsonSchema:2.9.6
 

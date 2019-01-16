@@ -64,11 +64,7 @@ import org.apache.maven.shared.dependency.graph.traversal.DependencyNodeVisitor;
  * This plugin tests a project's dependencies for 'alignment' and produces a simple text based report.
  * Based ideas and code from the Maven Dependency Plugin project.
  * <p>
- * TODO: Add failure flag that controls build failure if there are > 0 unaligned dependencies, also perhaps
- * distinguish between unaligned direct and unaligned transitive to allow the user to fine tune the
- * failure case.
- * <p>
- * TODO: A support for an exludes file allows dependencies with unaligned dependencies to be ignored.
+ * TODO: A support for an excludes file allows dependencies with unaligned dependencies to be ignored.
  */
 @Mojo(name = "report", requiresDependencyCollection = ResolutionScope.TEST, threadSafe = true)
 public class AlignmentReporterMojo extends AbstractMojo
@@ -205,11 +201,11 @@ public class AlignmentReporterMojo extends AbstractMojo
             {
                 String projectTitle = getProjectTitle();
 
-                write(projectTitle, outputFile, this.appendOutput, getLog());
-                write(alignedDirectStr, outputFile, true, getLog());
-                write(unalignedDirectStr, outputFile, true, getLog());
-                write(unalignedTransitivesStr, outputFile, true, getLog());
-                write(unalignedTransitiveDetail, outputFile, true, getLog());
+                write(projectTitle, outputFile, this.appendOutput);
+                write(alignedDirectStr, outputFile);
+                write(unalignedDirectStr, outputFile);
+                write(unalignedTransitivesStr, outputFile);
+                write(unalignedTransitiveDetail, outputFile);
 
                 getLog().info(String.format("Wrote alignment report tree to: %s", outputFile));
             }
@@ -480,7 +476,13 @@ public class AlignmentReporterMojo extends AbstractMojo
         return filter;
     }
 
-    private static synchronized void write(String string, File file, boolean append, Log log)
+    private static void write(String string, File file)
+            throws IOException
+    {
+        write(string, file, true);
+    }
+
+    private static void write(String string, File file, boolean append)
             throws IOException
     {
         file.getParentFile().mkdirs();
@@ -498,12 +500,11 @@ public class AlignmentReporterMojo extends AbstractMojo
      * @param log    where to log information.
      * @throws IOException if an I/O error occurs
      */
-    private static synchronized void log(String string, Log log)
+    private static void log(String string, Log log)
             throws IOException
     {
         try (BufferedReader reader = new BufferedReader(new StringReader(string)))
         {
-
             String line;
 
             while ((line = reader.readLine()) != null)
