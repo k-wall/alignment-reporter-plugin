@@ -19,6 +19,7 @@
 
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -26,8 +27,9 @@ import org.apache.maven.plugins.annotations.ResolutionScope;
 import org.apache.maven.project.MavenProject;
 
 @SuppressWarnings("unused")
-@Mojo(name = "report", requiresDependencyCollection = ResolutionScope.TEST, threadSafe = true)
-public class AlignmentReporterMojo extends AbstractAlignmentReporterMojo
+@Mojo(name = "aggregate-report", aggregator = true, requiresDependencyCollection = ResolutionScope.TEST, threadSafe =
+        true)
+public class AggregateAlignmentReporterMojo extends AbstractAlignmentReporterMojo
 {
     @Override
     protected Set<Artifact> getDirectDependencies()
@@ -35,9 +37,9 @@ public class AlignmentReporterMojo extends AbstractAlignmentReporterMojo
         Set<Artifact> reactorArtifacts =
                 reactorProjects.stream().map(MavenProject::getArtifact).collect(Collectors.toSet());
 
-        return getProject().getDependencyArtifacts()
-                           .stream()
-                           .filter(a -> !reactorArtifacts.contains(a))
-                           .collect(Collectors.toSet());
+        return reactorProjects.stream().map(p -> p.getDependencyArtifacts().stream())
+                              .flatMap(Stream::distinct)
+                              .filter(a -> !reactorArtifacts.contains(a))
+                              .collect(Collectors.toSet());
     }
 }
