@@ -11,19 +11,19 @@ versions.
 
 Example usage:
 
-``
+```bash
 mvn alignment-reporter:alignment-reporter-plugin:1.0-SNAPSHOT:report -Dscope=runtime -DalignmentPattern=myorg
-``
+```
 
 For multi-module projects, the ``aggregate-report`` produces a single report.
 
-``
+```bash
 mvn alignment-reporter:alignment-reporter-plugin:1.0-SNAPSHOT:aggregate-report -Dscope=runtime -DalignmentPattern=myorg
-``
+```
 
 Example report:
 
-``
+```
 ========
 mymodule
 ========
@@ -66,6 +66,4 @@ Unaligned transitive - org.reactivestreams:reactive-streams:1.0.2 <- org.jboss.r
 Unaligned transitive - org.jboss.spec.javax.annotation:jboss-annotations-api_1.2_spec:1.0.0.Final <- org.jboss.resteasy:resteasy-jaxrs:3.6.1.SP2-myorg-00001 <- org.jboss.resteasy:resteasy-vertx:3.6.1.SP2-myorg-00001
 Unaligned transitive - javax.activation:activation:1.1.1 <- org.jboss.resteasy:resteasy-jaxrs:3.6.1.SP2-myorg-00001 <- org.jboss.resteasy:resteasy-vertx:3.6.1.SP2-myorg-00001
 Unaligned transitive - commons-io:commons-io:2.5 <- org.jboss.resteasy:resteasy-jaxrs:3.6.1.SP2-myorg-00001 <- org.jboss.resteasy:resteasy-vertx:3.6.1.SP2-myorg-00001
-Unaligned transitive - javax.json.bind:javax.json.bind-api:1.0 <- org.jboss.resteasy:resteasy-jaxrs:3.6.1.SP2-myorg-00001 <- org.jboss.resteasy:resteasy-vertx:3.6.1.SP2-myorg-00001
-
-``
+Unaligned transitive - javax.json.bind:javax.json.bind-api:1.0 <- org.jboss.resteasy:resteasy-jaxrs:3.6.1.SP2-myorg-00001 <- org.jboss.resteasy:resteasy-vertx:3.6.1.SP2-myorg-00001```
