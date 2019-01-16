@@ -63,11 +63,11 @@ import org.apache.maven.shared.dependency.graph.traversal.DependencyNodeVisitor;
 /**
  * This plugin tests a project's dependencies for 'alignment' and produces a simple text based report.
  * Based ideas and code from the Maven Dependency Plugin project.
- *
+ * <p>
  * TODO: Add failure flag that controls build failure if there are > 0 unaligned dependencies, also perhaps
  * distinguish between unaligned direct and unaligned transitive to allow the user to fine tune the
  * failure case.
- *
+ * <p>
  * TODO: A support for an exludes file allows dependencies with unaligned dependencies to be ignored.
  */
 @Mojo(name = "report", requiresDependencyCollection = ResolutionScope.TEST, threadSafe = true)
@@ -122,9 +122,13 @@ public class AlignmentReporterMojo extends AbstractMojo
     private boolean appendOutput;
 
     /**
+     * A flag to fail the build if alignment errors are detected
+     */
+    @Parameter(property = "failOnUnalignedDependencies", defaultValue = "false")
+    private boolean failOnUnalignedDependencies;
+
+    /**
      * Skip plugin execution completely.
-     *
-     * @since 2.7
      */
     @Parameter(property = "skip", defaultValue = "false")
     private boolean skip;
@@ -182,9 +186,8 @@ public class AlignmentReporterMojo extends AbstractMojo
                                                                 .sorted(ARTIFACT_COMPARATOR)
                                                                 .collect(Collectors.toList());
 
-            String alignedDirectStr = reportDirectDependencies(alignedDirect, "Aligned direct");
-
-            String unalignedDirectStr = reportDirectDependencies(unalignedDirect, "Unaligned direct");
+            String alignedDirectStr = reportDirectDependencies(alignedDirect, "Aligned");
+            String unalignedDirectStr = reportDirectDependencies(unalignedDirect, "Unaligned");
 
             DependencyNode rootNode =
                     dependencyGraphBuilder.buildDependencyGraph(buildingRequest, artifactFilter, reactorProjects);
@@ -194,10 +197,9 @@ public class AlignmentReporterMojo extends AbstractMojo
                                                                      .contains(node.getArtifact()))
                                                              .collect(Collectors.toList());
 
-            String alignedDirectWithUnalignedDeps =
-                    reportAlignedDirectDependenciesWithUnalignedDependencySummary(alignedDirectDeps);
-
-            String transitiveAlignment = reportUnalignedTransitiveDependencyDetail(alignedDirectDeps);
+            Map<DependencyNode, AtomicInteger> unalignedTransitives = getUnalignedDependencies(alignedDirectDeps);
+            String unalignedTransitivesStr = reportUnalignedTransitiveDependenciesSummary(unalignedTransitives);
+            String unalignedTransitiveDetail = reportUnalignedTransitiveDependencyDetail(alignedDirectDeps);
 
             if (outputFile != null)
             {
@@ -206,8 +208,8 @@ public class AlignmentReporterMojo extends AbstractMojo
                 write(projectTitle, outputFile, this.appendOutput, getLog());
                 write(alignedDirectStr, outputFile, true, getLog());
                 write(unalignedDirectStr, outputFile, true, getLog());
-                write(alignedDirectWithUnalignedDeps, outputFile, true, getLog());
-                write(transitiveAlignment, outputFile, true, getLog());
+                write(unalignedTransitivesStr, outputFile, true, getLog());
+                write(unalignedTransitiveDetail, outputFile, true, getLog());
 
                 getLog().info(String.format("Wrote alignment report tree to: %s", outputFile));
             }
@@ -215,8 +217,39 @@ public class AlignmentReporterMojo extends AbstractMojo
             {
                 log(alignedDirectStr, getLog());
                 log(unalignedDirectStr, getLog());
-                log(alignedDirectWithUnalignedDeps, getLog());
-                log(transitiveAlignment, getLog());
+                log(unalignedTransitivesStr, getLog());
+                log(unalignedTransitiveDetail, getLog());
+            }
+
+            if (failOnUnalignedDependencies)
+            {
+                StringBuilder failureMessages = new StringBuilder();
+
+                if (!unalignedDirect.isEmpty())
+                {
+                    failureMessages.append(String.format("There are %d unaligned direct dependenc%s",
+                                                         unalignedDirect.size(),
+                                                         unalignedDirect.size() == 1 ? "y" : "ies"));
+                }
+
+                if (!unalignedTransitives.isEmpty())
+                {
+                    failureMessages.append(failureMessages.length() > 0 ? " and there" : "There");
+
+                    failureMessages.append(String.format(
+                            " are %d unaligned transitive dependenc%s of aligned direct dependencies.",
+                            unalignedTransitives.size(),
+                            unalignedTransitives.size() == 1 ? "y" : "ies"));
+                }
+                else if (failureMessages.length() > 0)
+                {
+                    failureMessages.append(".");
+                }
+
+                if (failureMessages.length() > 0)
+                {
+                    throw new MojoFailureException(failureMessages.toString());
+                }
             }
         }
         catch (DependencyGraphBuilderException exception)
@@ -251,8 +284,36 @@ public class AlignmentReporterMojo extends AbstractMojo
         }
     }
 
-    private String reportAlignedDirectDependenciesWithUnalignedDependencySummary(final List<DependencyNode> alignedDirectDeps)
+    private String reportUnalignedTransitiveDependenciesSummary(final Map<DependencyNode, AtomicInteger> summary)
             throws IOException
+    {
+        try (StringWriter out = new StringWriter();
+             PrintWriter writer = new PrintWriter(out))
+        {
+            if (!summary.isEmpty())
+            {
+
+                String title = "Summary - Aligned direct dependencies with unaligned transitive dependencies";
+                writer.println(title);
+                writer.println(StringUtils.repeat("-", title.length()));
+
+                summary.entrySet().stream().forEach(
+                        e -> {
+                            Artifact a = e.getKey().getArtifact();
+                            writer.println(
+                                    String.format("Incompletely aligned - %s:%s:%s",
+                                                  a.getGroupId(),
+                                                  a.getArtifactId(),
+                                                  a.getVersion()));
+                        });
+
+                writer.println();
+            }
+            return out.toString();
+        }
+    }
+
+    private Map<DependencyNode, AtomicInteger> getUnalignedDependencies(final List<DependencyNode> alignedDirectDeps)
     {
         Map<DependencyNode, AtomicInteger> summary = new HashMap<>();
 
@@ -280,32 +341,7 @@ public class AlignmentReporterMojo extends AbstractMojo
                 }
             });
         });
-
-        ;
-        try (StringWriter out = new StringWriter();
-             PrintWriter writer = new PrintWriter(out))
-        {
-            if (!summary.isEmpty())
-            {
-
-                String title = "Summary - Aligned direct dependencies with unaligned transitive dependencies";
-                writer.println(title);
-                writer.println(StringUtils.repeat("-", title.length()));
-
-                summary.entrySet().stream().forEach(
-                        e -> {
-                            Artifact a = e.getKey().getArtifact();
-                            writer.println(
-                                    String.format("Incompletely aligned - %s:%s:%s",
-                                                  a.getGroupId(),
-                                                  a.getArtifactId(),
-                                                  a.getVersion()));
-                        });
-
-                writer.println();
-            }
-            return out.toString();
-        }
+        return summary;
     }
 
     private String reportUnalignedTransitiveDependencyDetail(final List<DependencyNode> alignedNodes) throws IOException
