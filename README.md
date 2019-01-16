@@ -6,7 +6,7 @@ Alignment is judged on whether a dependency's version matches an `alignmentPatte
 match the regular expression are consider aligned, those which don't are unaligned. In additional the report distingishes
 between transitive and direct dependencies of the project.
 
-This might be useful for organisations making use of https://github.com/release-engineering/pom-manipulation-ext to write dependency
+This might be useful for organisations making use of https://github.com/release-engineering/pom-manipulation-ext to rewrite dependency
 versions.
 
 Example usage:
