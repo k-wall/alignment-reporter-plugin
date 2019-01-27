@@ -17,12 +17,8 @@
  * under the License.
  */
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -42,22 +38,16 @@ import org.apache.maven.shared.dependency.graph.DependencyNode;
 public class AggregateAlignmentReporterMojo extends AbstractAlignmentReporterMojo
 {
     @Override
-    protected Set<Artifact> getDirectDependencies()
+    protected Set<DependencyNode> getDirectDependencies(final ArtifactFilter artifactFilter)
+            throws DependencyGraphBuilderException
     {
         Set<Artifact> reactorArtifacts =
                 reactorProjects.stream().map(MavenProject::getArtifact).collect(Collectors.toSet());
 
-        return reactorProjects.stream().map(p -> p.getDependencyArtifacts().stream())
-                              .flatMap(Stream::distinct)
-                              .filter(a -> !reactorArtifacts.contains(a))
-                              .collect(Collectors.toSet());
-    }
-
-    @Override
-    protected List<DependencyNode> getAlignedDirectDependencyNodes(final ArtifactFilter artifactFilter,
-                                                                   final List<Artifact> alignedDirect)
-            throws DependencyGraphBuilderException
-    {
+        Set<Artifact> artifacts = reactorProjects.stream().map(p -> p.getDependencyArtifacts().stream())
+                                                 .flatMap(Stream::distinct)
+                                                 .filter(a -> !reactorArtifacts.contains(a))
+                                                 .collect(Collectors.toSet());
 
         Set<DependencyNode> all = new HashSet<>();
 
@@ -70,13 +60,12 @@ public class AggregateAlignmentReporterMojo extends AbstractAlignmentReporterMoj
             DependencyNode rootNode =
                     dependencyGraphBuilder.buildDependencyGraph(buildingRequest, artifactFilter, reactorProjects);
 
-            Set<DependencyNode> collect = rootNode.getChildren().stream()
-                                                  .filter(node -> alignedDirect
-                                                          .contains(node.getArtifact()))
-                                                  .collect(Collectors.toSet());
-            all.addAll(collect);
+            Set<DependencyNode> dns = rootNode.getChildren().stream()
+                                              .filter(node -> artifacts.contains(node.getArtifact()))
+                                              .collect(Collectors.toSet());
+            all.addAll(dns);
         }
 
-        return new ArrayList<>(all);
+        return all;
     }
 }
