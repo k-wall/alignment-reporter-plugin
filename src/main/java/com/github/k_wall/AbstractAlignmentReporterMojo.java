@@ -180,7 +180,6 @@ public abstract class AbstractAlignmentReporterMojo extends AbstractMojo
             List<Artifact> alignedDirect = dependencyArtifacts.stream()
                                                               .filter(artifact -> alignmentPattern.matcher(artifact.getVersion())
                                                                                                   .find())
-
                                                               .sorted(ARTIFACT_COMPARATOR)
                                                               .collect(Collectors.toList());
 

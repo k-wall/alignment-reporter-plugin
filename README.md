@@ -3,11 +3,15 @@
 This plugin tests a project's dependencies for 'alignment' and produces a simple text based report with the result.
 
 Alignment is judged on whether a dependency's version matches an `alignmentPattern` which is expressed as a  regular expression.  Dependencies which
-match the regular expression are consider aligned, those which don't are unaligned. In additional the report distingishes
+match the regular expression are consider aligned, those which don't are unaligned. In additional the report distinguishes
 between transitive and direct dependencies of the project.
 
 This might be useful for organisations making use of https://github.com/release-engineering/pom-manipulation-ext to rewrite dependency
 versions.
+
+If `failOnUnalignedDependencies` is set `true`, the existence of unaligned dependencies will cause the build to fail.
+
+The `scope` provides the filter by when resolving the dependency tree, or null to include dependencies from all scopes.
 
 Example usage:
 
@@ -23,8 +27,7 @@ mvn alignment-reporter:alignment-reporter-plugin:1.0-SNAPSHOT:aggregate-report -
 
 Example report:
 
-```
-========
+```========
 mymodule
 ========
 
@@ -66,4 +69,5 @@ Unaligned transitive - org.reactivestreams:reactive-streams:1.0.2 <- org.jboss.r
 Unaligned transitive - org.jboss.spec.javax.annotation:jboss-annotations-api_1.2_spec:1.0.0.Final <- org.jboss.resteasy:resteasy-jaxrs:3.6.1.SP2-myorg-00001 <- org.jboss.resteasy:resteasy-vertx:3.6.1.SP2-myorg-00001
 Unaligned transitive - javax.activation:activation:1.1.1 <- org.jboss.resteasy:resteasy-jaxrs:3.6.1.SP2-myorg-00001 <- org.jboss.resteasy:resteasy-vertx:3.6.1.SP2-myorg-00001
 Unaligned transitive - commons-io:commons-io:2.5 <- org.jboss.resteasy:resteasy-jaxrs:3.6.1.SP2-myorg-00001 <- org.jboss.resteasy:resteasy-vertx:3.6.1.SP2-myorg-00001
-Unaligned transitive - javax.json.bind:javax.json.bind-api:1.0 <- org.jboss.resteasy:resteasy-jaxrs:3.6.1.SP2-myorg-00001 <- org.jboss.resteasy:resteasy-vertx:3.6.1.SP2-myorg-00001```
+Unaligned transitive - javax.json.bind:javax.json.bind-api:1.0 <- org.jboss.resteasy:resteasy-jaxrs:3.6.1.SP2-myorg-00001 <- org.jboss.resteasy:resteasy-vertx:3.6.1.SP2-myorg-00001
+```
