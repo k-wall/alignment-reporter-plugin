@@ -1,4 +1,4 @@
-/*
+package com.github.k_wall;/*
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements.  See the NOTICE file
  * distributed with this work for additional information
@@ -17,10 +17,8 @@
  * under the License.
  */
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
@@ -33,9 +31,8 @@ import org.apache.maven.shared.dependency.graph.DependencyGraphBuilderException;
 import org.apache.maven.shared.dependency.graph.DependencyNode;
 
 @SuppressWarnings("unused")
-@Mojo(name = "aggregate-report", aggregator = true, requiresDependencyCollection = ResolutionScope.TEST, threadSafe =
-        true)
-public class AggregateAlignmentReporterMojo extends AbstractAlignmentReporterMojo
+@Mojo(name = "report", requiresDependencyCollection = ResolutionScope.TEST, threadSafe = true)
+public class AlignmentReporterMojo extends AbstractAlignmentReporterMojo
 {
     @Override
     protected Set<DependencyNode> getDirectDependencies(final ArtifactFilter artifactFilter)
@@ -44,28 +41,20 @@ public class AggregateAlignmentReporterMojo extends AbstractAlignmentReporterMoj
         Set<Artifact> reactorArtifacts =
                 reactorProjects.stream().map(MavenProject::getArtifact).collect(Collectors.toSet());
 
-        Set<Artifact> artifacts = reactorProjects.stream().map(p -> p.getDependencyArtifacts().stream())
-                                                 .flatMap(Stream::distinct)
-                                                 .filter(a -> !reactorArtifacts.contains(a))
-                                                 .collect(Collectors.toSet());
-
-        Set<DependencyNode> all = new HashSet<>();
-
-        for (MavenProject reactorProject : reactorProjects)
-        {
-            ProjectBuildingRequest buildingRequest =
-                    new DefaultProjectBuildingRequest(session.getProjectBuildingRequest());
-            buildingRequest.setProject(reactorProject);
-
-            DependencyNode rootNode =
-                    dependencyGraphBuilder.buildDependencyGraph(buildingRequest, artifactFilter, reactorProjects);
-
-            Set<DependencyNode> dns = rootNode.getChildren().stream()
-                                              .filter(node -> artifacts.contains(node.getArtifact()))
+        Set<Artifact> artifacts = getProject().getDependencyArtifacts()
+                                              .stream()
+                                              .filter(a -> !reactorArtifacts.contains(a))
                                               .collect(Collectors.toSet());
-            all.addAll(dns);
-        }
 
-        return all;
+        ProjectBuildingRequest buildingRequest =
+                new DefaultProjectBuildingRequest(session.getProjectBuildingRequest());
+        buildingRequest.setProject(getProject());
+
+        DependencyNode rootNode =
+                dependencyGraphBuilder.buildDependencyGraph(buildingRequest, artifactFilter, reactorProjects);
+
+        return rootNode.getChildren().stream()
+                       .filter(node -> artifacts.contains(node.getArtifact()))
+                       .collect(Collectors.toSet());
     }
 }
