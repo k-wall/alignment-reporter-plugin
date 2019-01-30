@@ -44,6 +44,13 @@ under the License.
         <tag>HEAD</tag>
     </scm>
 
+    <distributionManagement>
+        <site>
+            <id>github</id>
+            <url>scm:git:git@github.com:k-wall/alignment-reporter-plugin.git</url>
+        </site>
+    </distributionManagement>
+
     <prerequisites>
         <maven>${mavenVersion}</maven>
     </prerequisites>
