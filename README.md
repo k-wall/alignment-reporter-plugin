@@ -13,13 +13,19 @@ If `failOnUnalignedDependencies` is set `true`, the existence of unaligned depen
 
 The `scope` provides the filter by when resolving the dependency tree, or null to include dependencies from all scopes.
 
+The `excludes` parameter allows dependencies to be ignored.  Exclude dependencies will neither appear on the report
+nor cause the build to fail if they are not aligned. The value of this parameter is a comma-separated list of
+artifacts to filter.  Each filter has the following form: `[groupId]:[artifactId]:[type]:[version]` where each pattern
+segment is optional and supports full and partial `*` wildcards. An empty pattern segment is treated as an implicit
+wildcard.
+
 Example usage:
 
 ```bash
 mvn alignment-reporter:alignment-reporter-plugin:1.0-SNAPSHOT:report -Dscope=runtime -DalignmentPattern=myorg
 ```
 
-For multi-module projects, the ``aggregate-report`` produces a single report.
+For multi-module projects, the ``aggregate-report`` produces a single report summarising the whole project.
 
 ```bash
 mvn alignment-reporter:alignment-reporter-plugin:1.0-SNAPSHOT:aggregate-report -Dscope=runtime -DalignmentPattern=myorg

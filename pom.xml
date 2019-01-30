@@ -45,6 +45,7 @@ under the License.
         <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
         <maven-dependency-tree.version>3.0.1</maven-dependency-tree.version>
         <maven-plugin-annotations.version>3.5.2</maven-plugin-annotations.version>
+        <maven-common-artifact-filters.version>3.0.1</maven-common-artifact-filters.version>
     </properties>
 
     <dependencyManagement>
@@ -83,6 +84,11 @@ under the License.
             <groupId>commons-lang</groupId>
             <artifactId>commons-lang</artifactId>
             <version>${commons-lang.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven.shared</groupId>
+            <artifactId>maven-common-artifact-filters</artifactId>
+            <version>${maven-common-artifact-filters.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.plugin-tools</groupId>
