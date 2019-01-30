@@ -30,6 +30,20 @@ under the License.
 
     <name>Alignment Reporter Plugin</name>
 
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+
+    <scm>
+        <connection>scm:git:git://github.com/k-wall/alignment-reporter-plugin.git</connection>
+        <developerConnection>scm:git:https://github.com/k-wall/alignment-reporter-plugin.git</developerConnection>
+        <url>https://github.com/k-wall/alignment-reporter-plugin/tree/${project.scm.tag}</url>
+        <tag>HEAD</tag>
+    </scm>
+
     <prerequisites>
         <maven>${mavenVersion}</maven>
     </prerequisites>
