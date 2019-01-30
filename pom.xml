@@ -44,13 +44,6 @@ under the License.
         <tag>HEAD</tag>
     </scm>
 
-    <distributionManagement>
-        <site>
-            <id>github</id>
-            <url>scm:git:git@github.com:k-wall/alignment-reporter-plugin.git</url>
-        </site>
-    </distributionManagement>
-
     <prerequisites>
         <maven>${mavenVersion}</maven>
     </prerequisites>
@@ -118,6 +111,16 @@ under the License.
     </dependencies>
 
     <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <skip>false</skip>
+                </configuration>
+            </plugin>
+        </plugins>
         <pluginManagement>
             <plugins>
                 <plugin>
