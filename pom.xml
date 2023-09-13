@@ -49,7 +49,7 @@ under the License.
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <mavenVersion>3.0</mavenVersion>
+        <mavenVersion>3.8.1</mavenVersion>
         <doxiaVersion>1.4</doxiaVersion>
         <pluginTestingVersion>2.1</pluginTestingVersion>
         <maven.compiler.source>1.8</maven.compiler.source>
