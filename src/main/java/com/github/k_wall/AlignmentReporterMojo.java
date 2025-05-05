@@ -18,43 +18,19 @@ package com.github.k_wall;/*
  */
 
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.apache.maven.project.DefaultProjectBuildingRequest;
-import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.ProjectBuildingRequest;
-import org.apache.maven.shared.dependency.graph.DependencyGraphBuilderException;
 import org.apache.maven.shared.dependency.graph.DependencyNode;
 
-@SuppressWarnings("unused")
 @Mojo(name = "report", requiresDependencyCollection = ResolutionScope.TEST, threadSafe = true)
 public class AlignmentReporterMojo extends AbstractAlignmentReporterMojo
 {
     @Override
-    protected Set<DependencyNode> getDirectDependencies(final ArtifactFilter artifactFilter)
-            throws DependencyGraphBuilderException
+    protected Set<DependencyNode> getDirectDependencies(final ArtifactFilter artifactFilter) throws MojoExecutionException
     {
-        Set<Artifact> reactorArtifacts =
-                reactorProjects.stream().map(MavenProject::getArtifact).collect(Collectors.toSet());
-
-        Set<Artifact> artifacts = getProject().getDependencyArtifacts()
-                                              .stream()
-                                              .filter(a -> !reactorArtifacts.contains(a))
-                                              .collect(Collectors.toSet());
-
-        ProjectBuildingRequest buildingRequest =
-                new DefaultProjectBuildingRequest(session.getProjectBuildingRequest());
-        buildingRequest.setProject(getProject());
-
-        DependencyNode rootNode =
-                dependencyGraphBuilder.buildDependencyGraph(buildingRequest, artifactFilter, reactorProjects);
-
-        return rootNode.getChildren().stream()
-                       .filter(node -> artifacts.contains(node.getArtifact()))
-                       .collect(Collectors.toSet());
+        return getDirectDependencies(getProject(), artifactFilter);
     }
 }
