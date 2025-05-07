@@ -52,11 +52,10 @@ under the License.
         <mavenVersion>3.8.1</mavenVersion>
         <doxiaVersion>1.4</doxiaVersion>
         <pluginTestingVersion>2.1</pluginTestingVersion>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.release>11</maven.compiler.release>
         <commons-lang.version>2.6</commons-lang.version>
         <maven-dependency-plugin.version>3.1.1</maven-dependency-plugin.version>
-        <maven-dependency-tree.version>3.0.1</maven-dependency-tree.version>
+        <maven-dependency-tree.version>3.3.0</maven-dependency-tree.version>
         <maven-plugin-annotations.version>3.5.2</maven-plugin-annotations.version>
         <maven-common-artifact-filters.version>3.0.1</maven-common-artifact-filters.version>
     </properties>
@@ -82,21 +81,25 @@ under the License.
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-plugin-api</artifactId>
             <version>${mavenVersion}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-model</artifactId>
             <version>${mavenVersion}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.maven</groupId>
+            <artifactId>maven-artifact</artifactId>
+            <version>${mavenVersion}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-core</artifactId>
             <version>${mavenVersion}</version>
-        </dependency>
-        <dependency>
-            <groupId>commons-lang</groupId>
-            <artifactId>commons-lang</artifactId>
-            <version>${commons-lang.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.maven.shared</groupId>
@@ -123,8 +126,16 @@ under the License.
         <pluginManagement>
             <plugins>
                 <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.14.0</version>
+                </plugin>
+                <plugin>
                     <artifactId>maven-plugin-plugin</artifactId>
-                    <version>3.5</version>
+                    <version>3.15.1</version>
+                    <configuration>
+                        <goalPrefix>alignment-reporter</goalPrefix>
+                    </configuration>
                     <executions>
                         <execution>
                             <id>default-descriptor</id>
@@ -141,5 +152,4 @@ under the License.
             </plugins>
         </pluginManagement>
     </build>
-
 </project>

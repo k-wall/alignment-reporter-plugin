@@ -19,53 +19,28 @@ package com.github.k_wall;/*
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.apache.maven.artifact.Artifact;
 import org.apache.maven.artifact.resolver.filter.ArtifactFilter;
+import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.ResolutionScope;
-import org.apache.maven.project.DefaultProjectBuildingRequest;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.project.ProjectBuildingRequest;
-import org.apache.maven.shared.dependency.graph.DependencyGraphBuilderException;
 import org.apache.maven.shared.dependency.graph.DependencyNode;
 
-@SuppressWarnings("unused")
 @Mojo(name = "aggregate-report", aggregator = true, requiresDependencyCollection = ResolutionScope.TEST, threadSafe =
         true)
 public class AggregateAlignmentReporterMojo extends AbstractAlignmentReporterMojo
 {
     @Override
     protected Set<DependencyNode> getDirectDependencies(final ArtifactFilter artifactFilter)
-            throws DependencyGraphBuilderException
+            throws MojoExecutionException
     {
-        Set<Artifact> reactorArtifacts =
-                reactorProjects.stream().map(MavenProject::getArtifact).collect(Collectors.toSet());
+        Set<DependencyNode> dependencies = new HashSet<>();
 
-        Set<Artifact> artifacts = reactorProjects.stream().map(p -> p.getDependencyArtifacts().stream())
-                                                 .flatMap(Stream::distinct)
-                                                 .filter(a -> !reactorArtifacts.contains(a))
-                                                 .collect(Collectors.toSet());
-
-        Set<DependencyNode> all = new HashSet<>();
-
-        for (MavenProject reactorProject : reactorProjects)
-        {
-            ProjectBuildingRequest buildingRequest =
-                    new DefaultProjectBuildingRequest(session.getProjectBuildingRequest());
-            buildingRequest.setProject(reactorProject);
-
-            DependencyNode rootNode =
-                    dependencyGraphBuilder.buildDependencyGraph(buildingRequest, artifactFilter, reactorProjects);
-
-            Set<DependencyNode> dns = rootNode.getChildren().stream()
-                                              .filter(node -> artifacts.contains(node.getArtifact()))
-                                              .collect(Collectors.toSet());
-            all.addAll(dns);
+        for (MavenProject reactorProject : reactorProjects) {
+            dependencies.addAll(getDirectDependencies(reactorProject, artifactFilter));
         }
 
-        return all;
+        return dependencies;
     }
 }
