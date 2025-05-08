@@ -24,7 +24,7 @@ under the License.
 
     <groupId>alignment-reporter</groupId>
     <artifactId>alignment-reporter-plugin</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1</version>
     <packaging>maven-plugin</packaging>
 
     <name>Alignment Reporter Plugin</name>
@@ -40,7 +40,7 @@ under the License.
         <connection>scm:git:git://github.com/k-wall/alignment-reporter-plugin.git</connection>
         <developerConnection>scm:git:https://github.com/k-wall/alignment-reporter-plugin.git</developerConnection>
         <url>https://github.com/k-wall/alignment-reporter-plugin/tree/${project.scm.tag}</url>
-        <tag>HEAD</tag>
+        <tag>alignment-reporter-plugin-1.1</tag>
     </scm>
 
     <prerequisites>
